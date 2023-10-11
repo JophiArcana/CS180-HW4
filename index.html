@@ -1,149 +1,149 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head>
-<style>
-  body {
-    padding: 100px;
-    width: 1000px;
-    margin: auto;
-    text-align: left;
-    font-weight: 300;
-    font-family: 'Serif', serif;
-    color: #121212;
-  }
-  h1, h2, h3, h4 {
-    font-family: 'Source Serif Pro', serif;
-  }
-</style>
-<title>CS180 Project 1</title>
-<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-<link href="https://fonts.googleapis.com/css?family=PT+Serif|Source+Serif+Pro" rel="stylesheet">
-</head>
-
-
-<body>
-
-<h1 align="middle">CS180 Intro to Computer Vision and Computational Photography</h1>
-<h1 align="middle">Project 1 by Wentinn Liao</h1>
-
-<div>
-
-<h2 align="middle">Overview</h2>
-<p>The core of the algorithm uses image histogram, edge detection, and image cross correlation to align the RGB channels. The reasoning behind this approach is that edges where color changes occur are likely to be present in all three channels, and therefore if we can magnifiy the edges, then this transform would be a good candidate for straightforward cross-correlation.</p>
-
-<p>The image histogram transform is used as a means to sharpen the image before edge detection, and is implemented by flattening and sorting the channel, then using <strong>np.searchsorted</strong> to determine what proportion of pixels lie below a given pixel value. Edge detection is implemented through a 3x3 Sobel Kernel, and calculating the Euclidean norm of the empirical color gradients. This norm is scaled linearly to <strong>[-5, 5]</strong> and passed through a sigmoid function to strengthen more prominent edges and weaken the lesser edges. This is then passed into (unnormalized) cross-correlation, which is maximized over a small window of displacements in order to find the optimal one.</p>
-
-<div>
-
-<h2 align="middle">Speedup</h2>
-<p>My algorithm does not explicitly construct a pyramid, but rather recursively constructs lower (half) resolution images until the images size is small enough to be processed directly. Empirically, this is found to be around 600px, which is also around the size of the largest small image. If the image is too large, then it recursively finds the optimal displacement for a half resolution image, doubles the displacement, and uses it as the center of the new search window. An additional speedup is used, which is decaying window size, meaning that as we go from low to high resolution, the window size decays exponentially. The goal of this is is to reduce computations on higher resolution images. This optimization performs well because searches on a lower resolution image will get us in the general ballpark of the optimal displacement, which allows the search window to be smaller for subsequent resolutions. In implementation, the window for low resolution images is <strong>[-40, 40] x [-40, 40]</strong> and decays by <strong>50%</strong> for each recursive call. The runtime is instant for small jpg images and around <strong>40s</strong> for large images, which is acceptable for what I care about.</p>
-
-<div>
-
-<h2 align="middle">Results</h2>
-<p>Shown below are the results of the implemented algorithm. The algorithm performs reasonably well and produces images that are not harmful to the naked eye unlike the unaligned images. However, visual examination on images such as <strong>onion church</strong> and <strong>monastery</strong> shows some of the alignments are marginally incorrect, for example exhibiting a small green or red shadow in the x or y direction. Attempts to fix this included quantization, which merges pixels that are likely to be part of the same object based on the predicted colors, and refinement which looks for these artifacts and makes miniscule changes. This algorithm performs poorly on some images with very fine details that produce many edges. This causes some alignments to be sufficiently good to be determined the "optimal" alignment.</p>
-
-<h3 align="middle">Example Images</h3>
-<div align="middle">
-    <table style="width=100%">
-        <tr>
-            <td>
-                <img src="images/cathedral.jpg" align="middle" width="400px"/>
-                <figcaption align="middle">Cathedral. R: (0, 0), G: (-7, -1), B: (-12, -3) </figcaption>
-            </td>
-            <td>
-                <img src="images/church.jpg" align="middle" width="400px"/>
-                <figcaption align="middle">Church. R: (0, 0), G: (-33, 8), B: (-58, 4)</figcaption>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <img src="images/emir.jpg" align="middle" width="400px"/>
-                <figcaption align="middle">Emir. R: (0, 0), G: (-58, -17), B: (-107, -41)</figcaption>
-            </td>
-            <td>
-                <img src="images/harvesters.jpg" align="middle" width="400px"/>
-                <figcaption align="middle">Harvesters. R: (0, 0), G: (-64, 3), B: (-124, -11)</figcaption>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <img src="images/icon.jpg" align="middle" width="400px"/>
-                <figcaption align="middle">Icon. R: (0, 0), G: (-48, -5), B: (-90, -23)</figcaption>
-            </td>
-            <td>
-                <img src="images/lady.jpg" align="middle" width="400px"/>
-                <figcaption align="middle">Lady. R: (0, 0), G: (-63, -3), B: (-119, -12)</figcaption>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <img src="images/melons.jpg" align="middle" width="400px"/>
-                <figcaption align="middle">Melons. R: (0, 0), G: (-96, -4), B: (-177, -11)</figcaption>
-            </td>
-            <td>
-                <img src="images/monastery.jpg" align="middle" width="400px"/>
-                <figcaption align="middle">Monastery. R: (0, 0), G: (-6, -1), B: (-3, -3)</figcaption>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <img src="images/onion_church.jpg" align="middle" width="400px"/>
-                <figcaption align="middle">Onion Church. R: (0, 0), G: (-58, -10), B: (-107, -35)</figcaption>
-            </td>
-            <td>
-                <img src="images/sculpture.jpg" align="middle" width="400px"/>
-                <figcaption align="middle">Sculpture. R: (0, 0), G: (-106, 16), B: (-139, 27)</figcaption>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <img src="images/self_portrait.jpg" align="middle" width="400px"/>
-                <figcaption align="middle">Self Portrait. R: (0, 0), G: (-98, -8), B: (-176, -37)</figcaption>
-            </td>
-            <td>
-                <img src="images/three_generations.jpg" align="middle" width="400px"/>
-                <figcaption align="middle">Three Generations. R: (0, 0), G: (-57, -1), B: (-108, -8)</figcaption>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <img src="images/tobolsk.jpg" align="middle" width="400px"/>
-                <figcaption align="middle">Tobolsk. R: (0, 0), G: (-4, -1), B: (-7, -4)</figcaption>
-            </td>
-            <td>
-                <img src="images/train.jpg" align="middle" width="400px"/>
-                <figcaption align="middle">Train. R: (0, 0), G: (-44, -27), B: (-85, -29)</figcaption>
-            </td>
-        </tr>
-    </table>
-</div>
-
-<h3 align="middle">Images from the Prokudin-Gorskii Collection</h3>
-<div align="middle">
-    <table style="width=100%">
-        <tr>
-            <td>
-                <img src="images/Belaia River.jpg" align="middle" width="400px"/>
-                <figcaption align="middle">Belaia River. R: (0, 0), G: (-68, 18), B: (-120, -36)</figcaption>
-            </td>
-            <td>
-                <img src="images/Etruscan Vases.jpg" align="middle" width="400px"/>
-                <figcaption align="middle">Etruscan Vases. R: (0, 0), G: (-86, -2), B: (-111, -7)</figcaption>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <img src="images/Milan Cathedral.jpg" align="middle" width="400px"/>
-                <figcaption align="middle">Milan Cathedral. R: (0, 0), G: (-52, -10), B: (-108, -25)</figcaption>
-            </td>
-            <td>
-                <img src="images/Milan Cathedral 2.jpg" align="middle" width="400px"/>
-                <figcaption align="middle">Milan Cathedral 2. R: (0, 0), G: (-69, -11), B: (-125, -24)</figcaption>
-            </td>
-        </tr>
-    </table>
-</div>
-
-</body>
+    <head>
+        <style>
+            body {
+                padding: 100px;
+                width: 1000px;
+                margin: auto;
+                text-align: left;
+                font-weight: 300;
+                font-family: 'Serif', serif;
+                color: #121212;
+            }
+            h1, h2, h3, h4 {
+                font-family: 'Source Serif Pro', serif;
+            }
+        </style>
+        <title>CS180 Project 4a</title>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+        <link href="https://fonts.googleapis.com/css?family=PT+Serif|Source+Serif+Pro" rel="stylesheet"/>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css" integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq" crossorigin="anonymous"/>
+        <script defer src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js" integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz" crossorigin="anonymous"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script>
+    </head>
+    
+    
+    <body>
+        <h1 align="middle">CS180 Intro to Computer Vision and Computational Photography</h1>
+        <h1 align="middle">Project 4a by Wentinn Liao</h1>
+        
+        <div>
+            <h2 align="left">Part 1. Shoot the Pictures</h2>
+            <p>A total of 17 pictures over a <b>~300 degree</b> field of view in BAIR labs of Berkeley Way West. The focal length and exposure were locked, and the center of projection was kept consistently as possible by referencing floor tiles and surrounding markings, although due to lack of a tripod there may be up to <b>~2cm</b> of error. Sixteen of them are shown below. The images are indexed from <b>-6</b> to <b>10</b>, where <b>0</b> corresponds to the image with the camera directly facing the window, and the images numbered increasingly from left to right. The choice of scene may be changed to BWW Floor 3 if I have an opportunity for access.</p>
+            <div align="middle">
+                <img src="images/image_grid.jpg" align="middle" height="720px"/>
+                <figcaption align="middle">Sixteen images from Berkeley Way West.</figcaption>
+            </div>
+            
+            
+            
+            <h2 align="left">Part 2. Recover Homographies</h2>
+            <p>The homographies are extracted by stacking the following equation</p>\[
+                \begin{bmatrix}
+                    x   & y & 1 & 0 & 0 & 0 & -x'x  & -x'y  \\
+                    0   & 0 & 0 & x & y & 1 & -y'x  & -y'y'
+                \end{bmatrix} \begin{bmatrix}
+                    a   \\
+                    b   \\
+                    c   \\
+                    d   \\
+                    e   \\
+                    f   \\
+                    g   \\
+                    h
+                \end{bmatrix} = \begin{bmatrix}
+                    x'  \\
+                    y'
+                \end{bmatrix}
+            \]<p>and solving least squares. The matrix can be constructed very quickly and in short code using NumPy smart indexing.</p>
+            
+            
+            
+            <h2 align="left">Part 3. Warp the Images</h2>
+            <p>To warp the images, we first augment the corners and warp them to obtain the bounding quadrilateral of the resulting image. This is used to compute the required shape of the image to fit the warp. Additionally, the offset of the image must be saved. I.e., the topleftmost warp will be <b>(0, 0)</b> in the indexing of the image, but was not necessarily the true warp destination. The pixels to be inverse-warped are calculated using <b>sk.draw.polygon</b>, and the inverse-warped pixels are bilinear sampled from the original image. After defining the correspondences between BWW -1 and BWW 0, the result of warping BWW -1 to the perspective of BWW 0 is shown below.</p>
+            <div align="middle">
+                <table>
+                    <tr>
+                        <td>
+                            <img src="images/warped_imn1.jpg" align="middle" height="360px"/>
+                            <figcaption align="middle">Warped BWW Image -1.</figcaption>
+                        </td>
+                        <td>
+                            <img src="code/data/BWW/BWW 0.jpg" align="middle" height="360px"/>
+                            <figcaption align="middle">BWW Image 0.</figcaption>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            
+            
+            
+            <h2 align="left">Part 4. Image Rectification</h3>
+                <p>To compute the rectification, four points known to form a rectangle defined by the windows are selected on BWW image 0. To keep the projection relatively to scale, the target rectangle is calculated by averaging the min and max <b>x</b> and <b>y</b> coordinates. BWW image 0 before and after rectification is shown below along with the rectangle used to define the rectification.</p>
+                <div align="middle">
+                    <table>
+                        <tr>
+                            <td>
+                                <img src="images/unrectified_im0.jpg" align="middle" height="360px"/>
+                                <figcaption align="middle">Unrectified BWW Image 0.</figcaption>
+                            </td>
+                            <td>
+                                <img src="images/rectified_im0.jpg" align="middle" height="360px"/>
+                                <figcaption align="middle">Rectified BWW Image 0.</figcaption>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <p>To compute the rectification for other images is slightly different. Although we can employ the same rectification technique, we will need to recover another homography between the two rectified images. Instead, we compute a homography from BWW Image -1 to the perspective of BWW Image 0, and compose it with the rectification homography of Image 0. The resulting homography will then not only rectify Image -1, but also rectify it to the same perspective as the rectified Image 0. The result of performing this rectification is shown below.</p>
+                <div align="middle">
+                    <table>
+                        <tr>
+                            <td>
+                                <img src="images/unrectified_imn1.jpg" align="middle" height="360px"/>
+                                <figcaption align="middle">Unrectified BWW Image -1.</figcaption>
+                            </td>
+                            <td>
+                                <img src="images/rectified_imn1.jpg" align="middle" height="360px"/>
+                                <figcaption align="middle">Rectified BWW Image -1.</figcaption>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                
+                
+                
+                <h2 align="left">Part 5. Blend the Images into a Mosaic</h2>
+                <p>To obtain the mask, we simply use the distance transform <b>sc.ndimage.distance_transform_edt</b> on the two images and compare the results. To perform the blending, I simply copied code from Project 2 which utilizes Gaussian and Laplacian stacks to perform the blend. Due to the noticeable difference in lighting of the two images, a more aggressive blend makes it look nicer, so a stack depth of <b>4</b> and <b>&#x03C3 = 3</b> (i.e. Gaussian filter size 19) is chosen, making the color transition at the stitch line is slightly smoother.</p>
+                <div align="middle">
+                    <img src="images/blended_im0_n1.jpg" align="middle" height="720px"/>
+                    <figcaption align="middle">Blended and rectified image -1 and 0 with stack depth 4 and &#x03C3 = 3.</figcaption>
+                </div>
+                
+                
+                
+                <h2 align="left">Tell us what you've learned</h2>
+                <p>The most interesting part of this project was realizing how effective and realistic a simple homographic transform can be in "modifying" the camera perspective. It is also interesting to prove that homographic transforms extracted from least squares are inverses. The proof is simple but the result is not as trivial as it seems, because the result of multiplying the homography is not necessarily the target coordinates augmented with <b>w = 1</b>, rather, each point ends up with some random scaling. The result is proven by interpreting this augmentation as a right multiplication by some diagonal matrix.</p> \[
+                    H\begin{bmatrix}
+                        \vec{x}^\top    \\
+                        \vec{y}^\top    \\
+                        \vec{1}^\top
+                    \end{bmatrix} = \begin{bmatrix}
+                        \vec{x}'^\top    \\
+                        \vec{y}'^\top    \\
+                        \vec{1}^\top
+                    \end{bmatrix}D \Rightarrow
+                    H^{-1}\begin{bmatrix}
+                        \vec{x}'^\top    \\
+                        \vec{y}'^\top    \\
+                        \vec{1}^\top
+                    \end{bmatrix} = \begin{bmatrix}
+                        \vec{x}^\top    \\
+                        \vec{y}^\top    \\
+                        \vec{1}^\top
+                    \end{bmatrix}D^{-1}
+                \] <p>The resulting equation shows that the inverse homography is indeed a valid homographic transform back to the original points. A similar proof exists to show composition of homographies is not only a homography, but also produces the expected result. In general, the scaling of each augmented point will be a right multiplication by some diagonal matrix, while the homographies will operate on the left, so the actual transformations of the coordinate system will operate independently of the scaling.
+        </div>
+    </body>
 </html>
