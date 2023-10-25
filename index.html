@@ -26,13 +26,17 @@
     
     <body>
         <h1 align="middle">CS180 Intro to Computer Vision and Computational Photography</h1>
-        <h1 align="middle">Project 4A by Wentinn Liao</h1>
+        <h1 align="middle">Project 4 by Wentinn Liao</h1>
         
         <div>
+            <h1 align="left">Part 4A</h1>
+            
+            
+            
             <h2 align="left">Part 1. Shoot the Pictures</h2>
             <p>A total of 17 pictures over a <b>~300 degree</b> field of view in BAIR labs of Berkeley Way West. The focal length and exposure were locked, and the center of projection was kept consistently as possible by referencing floor tiles and surrounding markings, although due to lack of a tripod there may be up to <b>~2cm</b> of error. Sixteen of them are shown below. The images are indexed from <b>-6</b> to <b>10</b>, where <b>0</b> corresponds to the image with the camera directly facing the window, and the images numbered increasingly from left to right. The choice of scene may be changed to BWW Floor 3 if I have an opportunity for access.</p>
             <div align="middle">
-                <img src="images/image_grid.jpg" align="middle" height="720px"/>
+                <img src="images/image_grid.png" align="middle" height="720px"/>
                 <figcaption align="middle">Sixteen images from Berkeley Way West.</figcaption>
             </div>
             
@@ -66,7 +70,7 @@
                 <table>
                     <tr>
                         <td>
-                            <img src="images/warped_imn1.jpg" align="middle" height="360px"/>
+                            <img src="images/warped_imn1.png" align="middle" height="360px"/>
                             <figcaption align="middle">Warped BWW Image -1.</figcaption>
                         </td>
                         <td>
@@ -85,11 +89,11 @@
                     <table>
                         <tr>
                             <td>
-                                <img src="images/unrectified_im0.jpg" align="middle" height="360px"/>
+                                <img src="images/unrectified_im0.png" align="middle" height="360px"/>
                                 <figcaption align="middle">Unrectified BWW Image 0.</figcaption>
                             </td>
                             <td>
-                                <img src="images/rectified_im0.jpg" align="middle" height="360px"/>
+                                <img src="images/rectified_im0.png" align="middle" height="360px"/>
                                 <figcaption align="middle">Rectified BWW Image 0.</figcaption>
                             </td>
                         </tr>
@@ -101,11 +105,11 @@
                     <table>
                         <tr>
                             <td>
-                                <img src="images/unrectified_imn1.jpg" align="middle" height="360px"/>
+                                <img src="images/unrectified_imn1.png" align="middle" height="360px"/>
                                 <figcaption align="middle">Unrectified BWW Image -1.</figcaption>
                             </td>
                             <td>
-                                <img src="images/rectified_imn1.jpg" align="middle" height="360px"/>
+                                <img src="images/rectified_imn1.png" align="middle" height="360px"/>
                                 <figcaption align="middle">Rectified BWW Image -1.</figcaption>
                             </td>
                         </tr>
@@ -115,10 +119,28 @@
                 
                 
                 <h2 align="left">Part 5. Blend the Images into a Mosaic</h2>
-                <p>To obtain the mask, we simply use the distance transform <b>sc.ndimage.distance_transform_edt</b> on the two images and compare the results. To perform the blending, I simply copied code from Project 2 which utilizes Gaussian and Laplacian stacks to perform the blend. Due to the noticeable difference in lighting of the two images, a more aggressive blend makes it look nicer, so a stack depth of <b>4</b> and <b>&#x03C3 = 3</b> (i.e. Gaussian filter size 19) is chosen, making the color transition at the stitch line is slightly smoother.</p>
+                <p>To obtain the mask, we simply use the distance transform <b>sc.ndimage.distance_transform_edt</b> on the two images and compare the results. To perform the blending, I simply copied code from Project 2 which utilizes Gaussian and Laplacian stacks to perform the blend. Due to the noticeable difference in lighting of the two images, a more aggressive blend makes it look nicer, so a stack depth of <b>2</b> and <b>&#x03C3 = 40</b> (i.e. Gaussian filter size 19) is chosen, making the color transition at the stitch line is slightly smoother.</p>
                 <div align="middle">
-                    <img src="images/blended_im0_n1.jpg" align="middle" height="720px"/>
-                    <figcaption align="middle">Blended and rectified image -1 and 0 with stack depth 4 and &#x03C3 = 3.</figcaption>
+                    <table>
+                        <tr>
+                            <td>
+                                <img src="images/blended/blended_im0_n1.png" align="middle" width="480px"/>
+                                <figcaption align="middle">Blended and rectified image -1 and 0 with stack depth 2 and &#x03C3 = 40.</figcaption>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <img src="images/blended/blended_im1_2.png" align="middle" width="480px"/>
+                                <figcaption align="middle">Blended and rectified image 1 and 2 with stack depth 2 and &#x03C3 = 40.</figcaption>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <img src="images/blended/blended_im6_7.png" align="middle" width="480px"/>
+                                <figcaption align="middle">Blended and rectified image 6 and 7 with stack depth 2 and &#x03C3 = 40.</figcaption>
+                            </td>
+                        </tr>
+                    </table>
                 </div>
                 
                 
@@ -143,7 +165,201 @@
                         \vec{y}^\top    \\
                         \vec{1}^\top
                     \end{bmatrix}D^{-1}
-                \] <p>The resulting equation shows that the inverse homography is indeed a valid homographic transform back to the original points. A similar proof exists to show composition of homographies is not only a homography, but also produces the expected result. In general, the scaling of each augmented point will be a right multiplication by some diagonal matrix, while the homographies will operate on the left, so the actual transformations of the coordinate system will operate independently of the scaling.
+                \] <p>The resulting equation shows that the inverse homography is indeed a valid homographic transform back to the original points. A similar proof exists to show composition of homographies is not only a homography, but also produces the expected result. In general, the scaling of each augmented point will be a right multiplication by some diagonal matrix, while the homographies will operate on the left, so the actual transformations of the coordinate system will operate independently of the scaling.</p>
+        </div>
+        <div>
+            <h1 align="left">Part 4B</h1>
+            
+            
+            
+            <h2 align="left">Section 2 & 3. Interest Point Detection and Adaptive Non-Maximal Suppression</h2>
+            <p>Ok, but can I just take a second to flex how clean this code is? An entire Harris corner interest point detector for <i><b>ONLY 5 LINES</b></i> that comes with free Adaptive Non-Maximal Suppression!!! And it only takes 2 seconds to run with insane vectorization and quick partition!!!</p>
+            <div align="middle">
+                <img src="images/section2_3_code.png" align="middle" width="960px"/>
+                <figcaption align="middle">Code for interest point detection and ANMS.</figcaption>
+            </div>
+            <p>The results of this code you can get for only 5 lines are shown. The darker points indicate points at which the Harris metric is stronger, although this value is not actually used in any way to compute the homography.</p>
+            <div align="middle">
+                <img src="images/interest_points_im1_2.png" align="middle" width="960px"/>
+                <figcaption align="middle">Interest point detection on BWW images 1 and 2.</figcaption>
+            </div>
+            
+            
+            
+            <h2 align="left">Section 4. Feature Descriptor Extraction</h2>
+            <p>No particularly interesting images to show here, although the good stuff will come later. In this section, all that was done was extracting a stack of image patches that corresponded to each interest point, resizing the patches from <b>40 x 40</b> to <b>5 x 5</b>, and normalizing to zero mean and unit variance.</p>
+            
+            
+            
+            <h2 align="left">Section 5. Feature Matching</h2>
+            <p>To match the features, we simply flatten them and perform a pairwise \(\ell_2\)-norm. To determine matches, we partition with interest in only the two best matches, and we consider it a feature pair if the loss of the first is at most <b>0.7</b> times that of the second. This are bounding boxes of the resulting pairs:</p>
+            <div align="middle">
+                <img src="images/feature_correspondences_im1_2.png" align="middle" width="960px"/>
+                <figcaption align="middle">Feature correspondences between BWW images 1 and 2.</figcaption>
+            </div>
+            <p>We can see that there are quite a number of correct pairings that allow us to more easily find the right homography. Additionally shown are examples of some cool or interesting matches found by this basic matching algorithm, with the downsampled feature descriptors on the left and the original image patches on the right.</p>
+            <div align="middle">
+                <table>
+                    <tr>
+                        <td>
+                            <img src="images/feature_correspondences/im1_2_pair6.png" align="middle" width="480px"/>
+                            <figcaption align="middle">Feature pair 6.</figcaption>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <img src="images/feature_correspondences/im1_2_pair25.png" align="middle" width="480px"/>
+                            <figcaption align="middle">Feature pair 25.</figcaption>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <img src="images/feature_correspondences/im1_2_pair39.png" align="middle" width="480px"/>
+                            <figcaption align="middle">Feature pair 39.</figcaption>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <img src="images/feature_correspondences/im1_2_pair49.png" align="middle" width="480px"/>
+                            <figcaption align="middle">Feature pair 49.</figcaption>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <img src="images/feature_correspondences/im1_2_pair60.png" align="middle" width="480px"/>
+                            <figcaption align="middle">Feature pair 60.</figcaption>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            
+            
+            
+            <h2 align="left">Section 6. Robust Homography Estimate</h2>
+            <p>To compute the final homography estimates, we run the RANSAC algorithm on the proposed feature descriptor pairs. It was observed from the hand-defined correspondences that the error of the homography on each correspondence was on the order of <b>2-5</b> so the threshold loss to determine a point as part of the confirmed set is set to be <b>10</b>. Furthermore, rather than using a set number of pairs that must be in consensus, we instead require that a certain proportion of them must be in consensus, which was conveniently determined to be <b>0.5</b>. Finally, for large numbers of feature pairs, it was often difficult to find the correct homography, which required more iterations of search. To increase the number of iterations, the sampling and modeling is actually done concurrently, and the best model out of all of them is chosen, which is functionally the same. Because different samples will result in different consensus set sizes, we simply mask the remaining feature points with zeros, as well as using the mask to indicate that its vector should be augmented with 0 instead of 1. This allows us to run up to <b>100000</b> iterations of search, but it was observed that only <b>40000</b> is sufficient to determine whether the homography could be correctly constructed or not. Once again, I am obligated to flex the cleanliness and efficiency of my code.</p>
+            <div align="middle">
+                <img src="images/section6_code.png" align="middle" width="960px"/>
+                <figcaption align="middle">Code for robust homography estimate.</figcaption>
+            </div>
+            <p>The result of all the mosaics are shown below. It can be noted that not all of them were completely successful, and BWW images 0 and 1 did not even find a sufficient homography. For those that were not as successful, e.g. <b>(-2, -1)</b>, <b>(-1, 0)</b>, and <b>(8, 9)</b>, it can be observed that the scene contains many more features, and although feature pairs might be correct, they might cause the homography to divert from features we visually care about more, such as the windows or column.</p>
+            <div align="middle">
+                <table>
+                    <tr>
+                        <td>
+                            <img src="images/autoblended/autoblended_im-6_-5.png" align="middle" width="320px"/>
+                            <figcaption align="middle">Autoblended BWW images -6 and -5.</figcaption>
+                        </td>
+                        <td>
+                            <img src="images/autoblended/autoblended_im-5_-4.png" align="middle" width="320px"/>
+                            <figcaption align="middle">Autoblended BWW images -5 and -4.</figcaption>
+                        </td>
+                        <td>
+                            <img src="images/autoblended/autoblended_im-4_-3.png" align="middle" width="320px"/>
+                            <figcaption align="middle">Autoblended BWW images -4 and -3.</figcaption>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <img src="images/autoblended/autoblended_im-3_-2.png" align="middle" width="320px"/>
+                            <figcaption align="middle">Autoblended BWW images -3 and -2.</figcaption>
+                        </td>
+                        <td>
+                            <img src="images/autoblended/autoblended_im-2_-1.png" align="middle" width="320px"/>
+                            <figcaption align="middle">Autoblended BWW images -2 and -1.</figcaption>
+                        </td>
+                        <td>
+                            <img src="images/autoblended/autoblended_im-1_0.png" align="middle" width="320px"/>
+                            <figcaption align="middle">Autoblended BWW images -1 and 0.</figcaption>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <img src="images/autoblended/autoblended_im1_2.png" align="middle" width="320px"/>
+                            <figcaption align="middle">Autoblended BWW images 1 and 2.</figcaption>
+                        </td>
+                        <td>
+                            <img src="images/autoblended/autoblended_im2_3.png" align="middle" width="320px"/>
+                            <figcaption align="middle">Autoblended BWW images 2 and 3.</figcaption>
+                        </td>
+                        <td>
+                            <img src="images/autoblended/autoblended_im3_4.png" align="middle" width="320px"/>
+                            <figcaption align="middle">Autoblended BWW images 3 and 4.</figcaption>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <img src="images/autoblended/autoblended_im4_5.png" align="middle" width="320px"/>
+                            <figcaption align="middle">Autoblended BWW images 4 and 5.</figcaption>
+                        </td>
+                        <td>
+                            <img src="images/autoblended/autoblended_im5_6.png" align="middle" width="320px"/>
+                            <figcaption align="middle">Autoblended BWW images 5 and 6.</figcaption>
+                        </td>
+                        <td>
+                            <img src="images/autoblended/autoblended_im6_7.png" align="middle" width="320px"/>
+                            <figcaption align="middle">Autoblended BWW images 6 and 7.</figcaption>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <img src="images/autoblended/autoblended_im7_8.png" align="middle" width="320px"/>
+                            <figcaption align="middle">Autoblended BWW images 7 and 8.</figcaption>
+                        </td>
+                        <td>
+                            <img src="images/autoblended/autoblended_im8_9.png" align="middle" width="320px"/>
+                            <figcaption align="middle">Autoblended BWW images 8 and 9.</figcaption>
+                        </td>
+                        <td>
+                            <img src="images/autoblended/autoblended_im9_10.png" align="middle" width="320px"/>
+                            <figcaption align="middle">Autoblended BWW images 9 and 10.</figcaption>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <p>Finally, below is a comparison of mosaics generated using the hand-defined correspondences with the autoblended mosaics. The hand defined correspondences still perform much better, especially when defined sparsely but correctly and structurally.</p>
+            <div align="middle">
+                <table>
+                    <tr>
+                        <td>
+                            <img src="images/blended/blended_im-1_0.png" align="middle" width="480px"/>
+                            <figcaption align="middle">Blended BWW images -1 and 0.</figcaption>
+                        </td>
+                        <td>
+                            <img src="images/autoblended/autoblended_im-1_0.png" align="middle" width="480px"/>
+                            <figcaption align="middle">Autoblended BWW images -1 and 0.</figcaption>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <img src="images/blended/blended_im1_2.png" align="middle" width="480px"/>
+                            <figcaption align="middle">Blended BWW images 1 and 2.</figcaption>
+                        </td>
+                        <td>
+                            <img src="images/autoblended/autoblended_im1_2.png" align="middle" width="480px"/>
+                            <figcaption align="middle">Autoblended BWW images 1 and 2.</figcaption>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <img src="images/blended/blended_im6_7.png" align="middle" width="480px"/>
+                            <figcaption align="middle">Blended BWW images 6 and 7.</figcaption>
+                        </td>
+                        <td>
+                            <img src="images/autoblended/autoblended_im6_7.png" align="middle" width="480px"/>
+                            <figcaption align="middle">Autoblended BWW images 6 and 7.</figcaption>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            
+            
+            
+            <h2 align="left">Tell us what you've learned</h2>
+            <p>The most interesting part of the second part was being able to visualize how effective simple feature extraction and matching algorithms can be in constructing homographies. The algorithm was able to find feature pairs that were correct but so detailed that I would not have expected it to find them.</p>
+            
+            
+            
+            </div>
         </div>
     </body>
 </html>
